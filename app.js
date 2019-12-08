@@ -16,7 +16,7 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 
 // Mongo URI
-const mongoURI = 'mongodb://brad:brad@ds257838.mlab.com:57838/mongouploads';
+const mongoURI = 'mongodb://username:password@cluster0-shard-00-00-opai5.azure.mongodb.net:27017,cluster0-shard-00-01-opai5.azure.mongodb.net:27017,cluster0-shard-00-02-opai5.azure.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=false&w=majority';
 
 // Create mongo connection
 const conn = mongoose.createConnection(mongoURI);
@@ -54,7 +54,8 @@ const upload = multer({ storage });
 // @route GET /
 // @desc Loads form
 app.get('/', (req, res) => {
-  gfs.files.find().toArray((err, files) => {
+  gfs.files.find({}).toArray((err, files) => {
+    console.log(err,files)
     // Check if files
     if (!files || files.length === 0) {
       res.render('index', { files: false });
@@ -62,7 +63,8 @@ app.get('/', (req, res) => {
       files.map(file => {
         if (
           file.contentType === 'image/jpeg' ||
-          file.contentType === 'image/png'
+          file.contentType === 'image/png'||
+          file.contentType === 'image/jpg' 
         ) {
           file.isImage = true;
         } else {
@@ -76,7 +78,7 @@ app.get('/', (req, res) => {
 
 // @route POST /upload
 // @desc  Uploads file to DB
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', upload.array('file',10), (req, res) => {
   // res.json({ file: req.file });
   res.redirect('/');
 });
